@@ -1,202 +1,166 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.zookeeper.server.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class CircularBufferTest {
+    private static Random random;
+    private static List<Integer> usedValues;
+    private int capacity;
+    private CircularBuffer<Integer> circularBuffer;
 
-    @Test
-    public void testCircularBuffer() {
-        final int capacity = 3;
-        CircularBuffer<String> buffer = new CircularBuffer<>(String.class, capacity);
 
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+    @BeforeAll
+    public static void configureRandomGenerator() {
+        CircularBufferTest.random = new Random(System.currentTimeMillis());
+        CircularBufferTest.usedValues = new ArrayList<>();
+    }
 
-        // write to the buffer
-        buffer.write("A");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+    @BeforeEach
+    public void configureCircularBuffer() {
+        this.capacity = CircularBufferTest.random.nextInt(1000);
+        this.circularBuffer = new CircularBuffer<>(Integer.class, this.capacity);
+    }
 
-        buffer.write("B");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        buffer.write("C");
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
-
-        // Buffer is full.
-        // Read from buffer
-        assertEquals("A", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        assertEquals("B", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        assertEquals("C", buffer.take());
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        // write to the buffer
-        buffer.write("1");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        buffer.write("2");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        buffer.write("3");
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
-
-        buffer.write("4"); // 4 overwrites 1
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
-
-        // Buffer if full
-        // Read from buffer
-        assertEquals("2", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        assertEquals("3", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        assertEquals("4", buffer.take());
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        // write to the buffer
-        buffer.write("a");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        buffer.write("b");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        buffer.write("c");
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
-
-        buffer.write("d"); // d overwrites a
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
-
-        buffer.write("e"); // e overwrites b
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
-
-        buffer.write("f"); // f overwrites c
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
-
-        buffer.write("g"); // g overwrites d
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
-
-        // Buffer is full.
-        // Read from buffer
-        assertEquals("e", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        assertEquals("f", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        assertEquals("g", buffer.take());
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+    @AfterEach
+    public void clearEnviron() {
+        CircularBufferTest.usedValues.clear();
     }
 
     @Test
-    public void testCircularBufferWithCapacity1() {
-        final int capacity = 1;
-        CircularBuffer<String> buffer = new CircularBuffer<>(String.class, capacity);
-
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        // write to the buffer
-        buffer.write("A");
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
-
-        buffer.write("B"); // B overwrite A
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
-
-        // Buffer is full.
-        // Read from buffer
-        assertEquals("B", buffer.take());
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+    public void shouldThrowIllegalArgumentException() {
+        int invalidCapacity = -100 + CircularBufferTest.random.nextInt(101);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new CircularBuffer<>(Integer.class, invalidCapacity));
     }
 
     @Test
-    public void testCircularBufferReset() {
-        final int capacity = 3;
-        CircularBuffer<String> buffer = new CircularBuffer<>(String.class, capacity);
-
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-
-        // write to the buffer
-        buffer.write("A");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-        assertEquals(1, buffer.size());
-        assertEquals("A", buffer.peek());
-
-        buffer.write("B");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-        assertEquals(2, buffer.size());
-        assertEquals("A", buffer.peek());
-
-        // reset
-        buffer.reset();
-        assertNull(buffer.peek());
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-        assertEquals(0, buffer.size());
+    public void shouldThrowIllegalArgumentZeroCapacity() {
+        Assertions.assertThrows(IllegalArgumentException.class, ()->new CircularBuffer<>(Integer.class, 0));
     }
 
     @Test
-    public void testCircularBufferIllegalCapacity() {
-        try {
-            CircularBuffer<String> buffer = new CircularBuffer<>(String.class, 0);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals("CircularBuffer capacity should be greater than 0", e.getMessage());
+    public void shouldThrowException() {
+        Assertions.assertThrows(Exception.class, () -> new CircularBuffer<>(null, 1));
+    }
+
+    @Test
+    public void testWriteNull() {
+        this.circularBuffer.write(null);
+        Integer actual = this.circularBuffer.take();
+        Assertions.assertNull(actual);
+    }
+
+    @Test
+    public void testTake() {
+        Assumptions.assumeTrue(this.capacity > 0);
+
+        int oldestIndex = writeOnBufferAndGetOldest();
+        int[] expectedValues = new int[this.circularBuffer.size()];
+        int[] actualValues = new int[this.circularBuffer.size()];
+        int k = 0;
+        while(!this.circularBuffer.isEmpty()) {
+            expectedValues[k] = CircularBufferTest.usedValues.get(oldestIndex);
+            actualValues[k] = this.circularBuffer.take();
+            oldestIndex++;
+            k++;
         }
+        Assertions.assertArrayEquals(expectedValues, actualValues);
     }
+
+    @Test
+    public void testPeek() {
+        Assumptions.assumeTrue(this.capacity > 0);
+
+        int oldestIndex = writeOnBufferAndGetOldest();
+        int expectedValue = CircularBufferTest.usedValues.get(oldestIndex);
+        int actualValue = this.circularBuffer.peek();
+        Assertions.assertEquals(expectedValue, actualValue);
+
+        actualValue = this.circularBuffer.peek();
+        Assertions.assertEquals(expectedValue, actualValue);
+
+        this.circularBuffer.write(CircularBufferTest.random.nextInt());
+        expectedValue = CircularBufferTest.usedValues.get(oldestIndex + 1);
+        actualValue = this.circularBuffer.peek();
+        Assertions.assertEquals(expectedValue, actualValue);
+    }
+
+    @Test
+    public void testSize() {
+        int expectedValue = writeOnBufferAndGetExpectedSize();
+        Assertions.assertEquals(expectedValue, this.circularBuffer.size());
+
+        this.circularBuffer.take();
+        expectedValue--;
+        Assertions.assertEquals(expectedValue, this.circularBuffer.size());
+
+    }
+
+    @Test
+    public void testIsEmpty() {
+        Assertions.assertTrue(this.circularBuffer.isEmpty());
+
+        int expectedSize = writeOnBufferAndGetExpectedSize();
+        Assertions.assertFalse(this.circularBuffer.isEmpty());
+
+        for(int i = 0; i < expectedSize; i++) {
+            this.circularBuffer.take();
+        }
+        Assertions.assertTrue(this.circularBuffer.isEmpty());
+
+        writeOnBufferAndGetExpectedSize();
+        this.circularBuffer.reset();
+        Assertions.assertTrue(this.circularBuffer.isEmpty());
+    }
+
+    @Test
+    public void testIsFull() {
+        Assertions.assertFalse(this.circularBuffer.isFull());
+
+        while (CircularBufferTest.usedValues.size() < this.capacity) {
+            writeOnBufferAndGetOldest();
+        }
+        Assertions.assertTrue(this.circularBuffer.isFull());
+
+        this.circularBuffer.take();
+        Assertions.assertFalse(this.circularBuffer.isFull());
+
+        this.circularBuffer.reset();
+        Assertions.assertFalse(this.circularBuffer.isFull());
+    }
+
+    @Test
+    public void testPeekEmptyBuffer() {
+        this.circularBuffer.write(1);
+        this.circularBuffer.reset();
+        Assertions.assertNull(this.circularBuffer.peek());
+    }
+
+    @Test
+    public void testTakeEmptyBuffer() {
+        this.circularBuffer.reset();
+        Assertions.assertNull(this.circularBuffer.take());
+    }
+
+    private int writeOnBufferAndGetOldest() {
+        int oldestIndex = 1;
+        for(int i = 0; i < CircularBufferTest.random.nextInt(Integer.MAX_VALUE); i++) {
+            Integer element = CircularBufferTest.random.nextInt();
+            this.circularBuffer.write(element);
+            CircularBufferTest.usedValues.add(element);
+            if(i > this.capacity) {
+                oldestIndex++;
+            }
+        }
+        return oldestIndex;
+    }
+
+    private int writeOnBufferAndGetExpectedSize() {
+        writeOnBufferAndGetOldest();
+        return Math.min(CircularBufferTest.usedValues.size(), this.capacity);
+    }
+
 }

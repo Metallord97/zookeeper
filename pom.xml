@@ -65,6 +65,7 @@
     <module>zookeeper-recipes</module>
     <module>zookeeper-assembly</module>
     <module>zookeeper-compatibility-tests</module>
+    <module>test-coverage</module>
   </modules>
 
   <scm>
@@ -573,6 +574,7 @@
     <commons-io.version>2.11.0</commons-io.version>
     <clover-maven-plugin.version>4.4.1</clover-maven-plugin.version>
     <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
+    <jacoco.version>0.8.8</jacoco.version>
 
     <!-- parameters to pass to C client build -->
     <c-client-openssl>yes</c-client-openssl>
@@ -824,6 +826,7 @@
           <artifactId>maven-scm-plugin</artifactId>
           <version>1.11.2</version>
         </plugin>
+
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -832,6 +835,7 @@
               <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
           </configuration>
         </plugin>
+
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
@@ -922,6 +926,32 @@
     </pluginManagement>
 
     <plugins>
+      <!--
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M5</version>
+      </plugin>
+      -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.8</version>
+        <executions>
+          <execution>
+            <id>jacoco-prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jacoco-report</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>com.github.koraktor</groupId>
         <artifactId>mavanagaiata</artifactId>

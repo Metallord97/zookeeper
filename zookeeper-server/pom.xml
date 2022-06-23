@@ -262,6 +262,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <!--
         <configuration>
           <includes>
             <include>**/*Test.java</include>
@@ -275,6 +276,7 @@
             <zookeeper.DigestAuthenticationProvider.superDigest>super:D/InIHSb7yEEbrWz8b9l71RjZJU=</zookeeper.DigestAuthenticationProvider.superDigest>
           </systemPropertyVariables>
         </configuration>
+        -->
       </plugin>
 
       <plugin>
@@ -332,6 +334,28 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>1.8.0</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>0.16</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <targetClasses>
+            <param>org.apache.zookeeper.server.DataTree</param>
+            <param>org.apache.zookeeper.server.util.CircularBuffer</param>
+          </targetClasses>
+          <targetTests>
+            <param>org.apache.zookeeper.server.DataTreeTest</param>
+            <param>org.apache.zookeeper.server.util.CircularBufferTest</param>
+          </targetTests>
+        </configuration>
       </plugin>
      </plugins>
   </build>
