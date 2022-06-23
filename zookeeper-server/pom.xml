@@ -26,7 +26,7 @@
     <version>3.9.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>zookeeperr</artifactId>
+  <artifactId>zookeeper</artifactId>
   <packaging>jar</packaging>
   <name>Apache ZooKeeper - Server</name>
   <description>ZooKeeper server</description>
