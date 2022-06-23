@@ -18,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
+            <artifactId>zookeeperr</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
