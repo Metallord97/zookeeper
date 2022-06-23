@@ -41,7 +41,7 @@
            once we get rid of ant based build
            https://issues.apache.org/jira/browse/ZOOKEEPER-3376
       -->
-      <artifactId>zookeeper</artifactId>
+      <artifactId>zookeeperr</artifactId>
       <version>${project.version}</version>
     </dependency>    
     <dependency>
